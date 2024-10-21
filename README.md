@@ -9,5 +9,5 @@
 - [**Gabriel Couto**](https://github.com/rouri404) - RM559579
 - [**João Vitor**](https://github.com/joaomatosq) - RM559246
 
-### Como funciona:
+## Como funciona:
 Não sei :c
