@@ -1,5 +1,9 @@
 # Caso da Vinheria Agnello - Data Logger - Checkpoint 2 - 1ESPA - Q4/2024
 
+> [!CAUTION]
+> página de projeto do cp2 de edge (incluindo um 2do), deem uma olhada lá
+> https://github.com/orgs/GrupoMoskitto/projects/3/views/1
+
 ## Mestre: 
 - Professor Fábio Cabrini
 ## Membros do Grupo - **Moskitto**:
