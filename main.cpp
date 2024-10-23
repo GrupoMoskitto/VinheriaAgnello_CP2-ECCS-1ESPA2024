@@ -90,6 +90,9 @@ int luxTick(){ // Função luminosidade e I/O dos LEDs, LDR e buzzer
       digitalWrite(buzzer, HIGH);
       delay(200);
       digitalWrite(buzzer, LOW);
+      if (intensidadeLDR < 51) {
+        break;
+      }
     }
   }
   if (21 < intensidadeLDR and intensidadeLDR < 50) {
@@ -108,6 +111,9 @@ int luxTick(){ // Função luminosidade e I/O dos LEDs, LDR e buzzer
       delay(100);
       digitalWrite(buzzer, LOW);
       delay(500);
+      if (21 > intensidadeLDR and intensidadeLDR > 50) {
+        break;
+      }
     }
 
    // Complemento do timer de 3 segundos para a disparada do buzzer
