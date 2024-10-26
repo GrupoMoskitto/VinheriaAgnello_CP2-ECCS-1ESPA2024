@@ -17,5 +17,6 @@
 O funcionamento das novas medições é bem similar ao cp1, entretanto, dessa vez nós optamos por usar mais funções em prol da quantidade de variáveis. Nosso novo código possui 2 novas funções, além de alternar entre duas telas a cada 5 segundos.
 - Função umidTemp(): Realiza as medições da temperatura e umidade usando o DHT22, e converte os valores para caberem no display 16x2.
 - Função nivelCritico(): Usando os valores cŕíticos pré-determinados de temp. e umid., ela demonstra na "segunda tela" do display se tais valores estão "ruins' ou "okay".
+## Armazenamento dos valores:
 A cada 10 segundos os valores são armazenados usando a EEPROM, desse modo, o cliente poderá ver no monitor serial os últimos valores críticos que a vinheria atingiu.
 
