@@ -23,8 +23,9 @@ const int recordSize = 8; // Tamanho de cada registro em bytes
 int startAddress = 0;
 int endAddress = maxRecords * recordSize;
 int currentAddress = 0;
-
 int lastLoggedMinute = -1;
+const unsigned long logInterval = 10000; // Intervalo de gravação (10 segundos)
+unsigned long previousMillis = 0; // Tempo da última gravação
 
 // Triggers de temperatura e umidade
 float trigger_t_min = 20.0; // Exemplo: valor mínimo de temperatura
@@ -42,8 +43,6 @@ float trigger_u_max = 60.0; // Exemplo: valor máximo de umidade
 // Declarando a variável global do nível de luminosidade 
 int intensidadeLDR; 
 
-char tempStr[6];  // Definir tamanho que a string irá ocupar no display
-char humStr[6];   
 
 void setup() {
 
@@ -56,32 +55,31 @@ void setup() {
  pinMode(ledVerde, OUTPUT);
  pinMode(pinoLDR, INPUT); //Define o sensor LDR como entrada
  pinMode(buzzer, OUTPUT);
- splashScreen();   // Chama a função da animação MOSKITTO      
+ splashScreen();   // Chama a função da animação "MOSKITTO"      
+
 
  //Configurações para medir umidade e temperatura
  pinMode(LED_BUILTIN, OUTPUT);
  dht.begin();
- lcd.init();   // Inicialização do LCD
- lcd.backlight();  // Ligando o backlight do LCD
- RTC.begin();    // Inicialização do Relógio em Tempo Real
+ RTC.begin();  // Inicialização do Relógio em Tempo Real
  RTC.adjust(DateTime(F(__DATE__), F(__TIME__)));
-
  EEPROM.begin();
+
+
 }
 
-
 int luxTick(){ // Função luminosidade e I/O dos LEDs, LDR e buzzer
-  
+  lcd.clear();
   intensidadeLDR = map(analogRead(pinoLDR), 20, 1010, 0, 100); // função map() usada para criar uma range calibrada para o LDR de 0 a 100
 
   // Condições da checagem da luminosidade e subsequentes ações
   if (intensidadeLDR > 51) {
-    Serial.println(" Luminosidade: Alerta!");
+    //Serial.println(" Luminosidade: Alerta!");
     //lcd.clear();
     //lcd.setCursor(0, 0);
     //lcd.print("Nivel de Luz:");
-    lcd.setCursor(1, 1);
-    lcd.print(intensidadeLDR);
+    //lcd.setCursor(1, 1);
+    //lcd.print(intensidadeLDR);
     digitalWrite(ledVermelho, HIGH);
     digitalWrite(ledAmarelo, LOW);
     digitalWrite(ledVerde, LOW);
@@ -90,18 +88,15 @@ int luxTick(){ // Função luminosidade e I/O dos LEDs, LDR e buzzer
       digitalWrite(buzzer, HIGH);
       delay(200);
       digitalWrite(buzzer, LOW);
-      if (intensidadeLDR < 51) {
-        break;
-      }
     }
   }
   if (21 < intensidadeLDR and intensidadeLDR < 50) {
-    Serial.println(" Luminosidade: Atencao!");
+    //Serial.println(" Luminosidade: Atencao!");
     //lcd.clear();
     //lcd.setCursor(0, 0);
     //lcd.print("Nivel de Luz:");
-    lcd.setCursor(1, 1);
-    lcd.print(intensidadeLDR);
+    //lcd.setCursor(1, 1);
+    //lcd.print(intensidadeLDR);
     digitalWrite(ledVermelho, LOW);
     digitalWrite(ledAmarelo, HIGH);
     digitalWrite(ledVerde, LOW);
@@ -111,44 +106,57 @@ int luxTick(){ // Função luminosidade e I/O dos LEDs, LDR e buzzer
       delay(100);
       digitalWrite(buzzer, LOW);
       delay(500);
-      if (21 > intensidadeLDR and intensidadeLDR > 50) {
-        break;
-      }
     }
 
-   // Complemento do timer de 3 segundos para a disparada do buzzer
   }
   if (intensidadeLDR < 20) {
-    Serial.println(" Luminosidade: normal");
+    //Serial.println(" Luminosidade: normal");
     //lcd.clear();
     //lcd.setCursor(0, 0);
-    // lcd.print("Nivel de Luz:");
-    lcd.setCursor(1, 1);
-    lcd.print(intensidadeLDR);
+    //lcd.print("Nivel de Luz:");
+    //lcd.setCursor(1, 1);
+    //lcd.print(intensidadeLDR);
     digitalWrite(ledVermelho, LOW);
     digitalWrite(ledAmarelo, LOW);
     digitalWrite(ledVerde, HIGH);
   }
+
 }
 
-
-void loop(){ // Função de loop principal do sistema para rodar indefinidamente
+int umidTemp() { //Função Umidade e Temperatura para o Display
   
- //Caracteres das medições
+  // Ler os valores de temperatura e umidade
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  
+  //converte o valor da temp. e umid. para caber no display
+  int humiInt = (int)humidity;
+  char tempStr[6];
+  dtostrf(temperature, 4, 1, tempStr);
+
+  //Printar valores das medições no lcd 
+  lcd.setCursor(1, 1);
+  lcd.print(intensidadeLDR);
+  lcd.setCursor(6, 1);
+  lcd.print(humiInt);
+  lcd.setCursor(11, 1);
+  lcd.print(tempStr);
+  delay(1000);
+
+  //Caracteres das medições
   byte image03[8] = {B00100, B00100, B01110, B01110, B11111, B11011, B11101, B01110};
   byte image08[8] = {B00000, B00100, B01110, B11101, B11011, B11001, B01110, B00000};
   byte image13[8] = {B00100, B01110, B01010, B01110, B01110, B01110, B01110, B00100};
   byte image32[8] = {B10111, B01000, B01000, B01000, B01000, B01000, B01000, B00111};
   byte image25[8] = {B10001, B00010, B00010, B00100, B00100, B01000, B01000, B10001};
   byte image20[8] = {B10001, B00010, B00010, B00100, B00100, B01000, B01000, B10001};
-
   lcd.createChar(0, image03);
   lcd.createChar(1, image08);
   lcd.createChar(2, image13);
   lcd.createChar(3, image32);
   lcd.createChar(4, image25);
   lcd.createChar(5, image20);
-
   lcd.setCursor(2, 0);
   lcd.write(byte(0));
   lcd.setCursor(7, 0);
@@ -161,49 +169,95 @@ void loop(){ // Função de loop principal do sistema para rodar indefinidamente
   lcd.write(byte(4));
   lcd.setCursor(3, 1);
   lcd.write(byte(5));
-  
-  //Função da luminosidade
-  luxTick();
-  //Serial.println(intensidadeLDR);
 
   
-  DateTime now = RTC.now();  // Obtém o horário atual do RTC
-  int offsetSeconds = UTC_OFFSET * 3600;  // Converte o fuso horário em segundos
-  now = now.unixtime() + offsetSeconds;  // Ajusta o horário para o fuso UTC
-  DateTime adjustedTime = DateTime(now);  // Converte de volta para DateTime
-  
+}
 
-  if (adjustedTime.minute() != lastLoggedMinute) {
-  lastLoggedMinute = adjustedTime.minute();  // Atualiza o minuto registrado
+int nivelCritico() { //Demonstra o status das medições(ruim ou okay)
 
-    // Liga e desliga o LED embutido
-    digitalWrite(LED_BUILTIN, HIGH);   
-    delay(1000);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(1000);
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+  int tempInt = (int)temperature;
+  int humiInt = (int)humidity;
 
-    // Ler os valores de temperatura e umidade
-    float humidity = dht.readHumidity();
-    float temperature = dht.readTemperature();
-    dtostrf(temperature, 4, 1, tempStr);  // Converte o valor de temperatura com 1 casa decimal
-    dtostrf(humidity, 4, 0, humStr);
-  
-    // Verificar se os valores estão fora dos triggers
-    if (temperature < trigger_t_min || temperature > trigger_t_max || humidity < trigger_u_min || humidity > trigger_u_max) {
-      // Converter valores para int para armazenamento
-      int tempInt = (int)(temperature * 100);
-      int humiInt = (int)(humidity * 100);
-      // Escrever dados na EEPROM
-      EEPROM.put(currentAddress, now.unixtime());
-      EEPROM.put(currentAddress + 4, tempInt);
-      EEPROM.put(currentAddress + 6, humiInt);
-
-      // Atualiza o endereço para o próximo registro
-      //getNextAddress();
-    }
+  if (temperature < trigger_t_min || temperature > trigger_t_max ) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Temp. : ruim");
+  }
+  else {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Temp. : okay!");
   }
 
-  if (SERIAL_OPTION) {
+  if (humidity < trigger_u_min || humidity > trigger_u_max){
+    lcd.setCursor(0, 1);
+    lcd.print("Umidade: ruim");
+  }
+  else {
+    lcd.setCursor(0, 1);
+    lcd.print("Umidade: okay!");
+  }
+
+}
+
+
+void loop(){ // Função de loop principal do sistema para rodar indefinidamente
+  
+  nivelCritico();
+  delay(5000);
+
+  //Função da luminosidade, Temp. e Umid.
+  luxTick();
+  umidTemp(); 
+  delay(5000);  //delay entre as diferentes telas 
+
+
+ //Configurações para armazenar os dados
+ DateTime now = RTC.now();
+
+ // Calculando o deslocamento do fuso horário
+ int offsetSeconds = UTC_OFFSET * 3600; // Convertendo horas para segundos
+ now = now.unixtime() + offsetSeconds; // Adicionando o deslocamento ao tempo atual
+
+ // Convertendo o novo tempo para DateTime
+ DateTime adjustedTime = DateTime(now);
+
+  if (LOG_OPTION) get_log();
+
+  unsigned long currentMillis = millis();
+    // Verifica se 10 segundos se passaram
+    if (currentMillis - previousMillis >= logInterval) {
+        previousMillis = currentMillis; // Atualiza o tempo da última gravação
+
+        digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+        delay(1000);                       // wait for a second
+        digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+        delay(1000);                       // wait for a second
+
+        // Ler os valores de temperatura e umidade
+        float humidity = dht.readHumidity();
+        float temperature = dht.readTemperature();
+
+        // Verificar se os valores estão fora dos triggers
+        if (temperature < trigger_t_min || temperature > trigger_t_max || humidity < trigger_u_min || humidity > trigger_u_max) {
+            // Converter valores para int para armazenamento
+            int tempInt = (int)(temperature * 100);
+            int humiInt = (int)(humidity * 100);
+
+            // Escrever dados na EEPROM
+            EEPROM.put(currentAddress, now.unixtime());
+            EEPROM.put(currentAddress + 4, tempInt);
+            EEPROM.put(currentAddress + 6, humiInt);
+
+            // Atualiza o endereço para o próximo registro
+            getNextAddress();
+        }
+      get_log();  
+    }
+
+    if (SERIAL_OPTION) {
         Serial.print(adjustedTime.day());
         Serial.print("/");
         Serial.print(adjustedTime.month());
@@ -221,11 +275,45 @@ void loop(){ // Função de loop principal do sistema para rodar indefinidamente
         Serial.print("\n");
     }
 
-    lcd.setCursor(4, 1);
-    lcd.print(humStr);
-    lcd.setCursor(11, 1);
-    lcd.print(tempStr);
-    delay(1000);
+}
+
+
+void getNextAddress() {
+    currentAddress += recordSize;
+    if (currentAddress >= endAddress) {
+        currentAddress = 0; // Volta para o começo se atingir o limite
+    }
+}
+
+void get_log() {
+    Serial.println("Data stored in EEPROM:");
+    Serial.println("Timestamp\t\tTemp. Crítica \tUmid. Crítica");
+
+    for (int address = startAddress; address < endAddress; address += recordSize) {
+        long timeStamp;
+        int tempInt, humiInt;
+
+        // Ler dados da EEPROM
+        EEPROM.get(address, timeStamp);
+        EEPROM.get(address + 4, tempInt);
+        EEPROM.get(address + 6, humiInt);
+
+        // Converter valores
+        float temperature = tempInt / 100.0;
+        float humidity = humiInt / 100.0;
+
+        // Verificar se os dados são válidos antes de imprimir
+        if (timeStamp != 0xFFFFFFFF) { // 0xFFFFFFFF é o valor padrão de uma EEPROM não inicializada
+            //Serial.print(timeStamp);
+            DateTime dt = DateTime(timeStamp);
+            Serial.print(dt.timestamp(DateTime::TIMESTAMP_FULL));
+            Serial.print("\t");
+            Serial.print(temperature);
+            Serial.print(" C\t\t");
+            Serial.print(humidity);
+            Serial.println(" %");
+        }
+    }
 }
 
 
@@ -233,6 +321,13 @@ void loop(){ // Função de loop principal do sistema para rodar indefinidamente
 
 
 
+
+
+
+
+
+
+//Todas essas funções abaixo são os frames do logo "Moskitto"
 
 
 void splashScreen(){
@@ -1031,3 +1126,4 @@ void image20() {
   delay(1500); // Espera de 1,5 segundos para iniciar o programa
   lcd.clear();
 }
+
