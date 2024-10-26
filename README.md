@@ -4,6 +4,8 @@
 > página de projeto do cp2 de edge (incluindo um 2do), deem uma olhada lá
 > https://github.com/orgs/GrupoMoskitto/projects/3/views/1
 
+> link do Wokwi: https://wokwi.com/projects/412826592371349505
+
 ## Mestre: 
 - Professor Fábio Cabrini
 ## Membros do Grupo - **Moskitto**:
