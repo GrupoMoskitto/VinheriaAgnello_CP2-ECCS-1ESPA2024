@@ -53,7 +53,7 @@ void setup() {
  lcd.backlight();   // Ativa o Backlight do display
 
  pinMode(pinoLDR, INPUT); //Define o sensor LDR como entrada
- pinMode(ledVermelho, OUTPUT); //Define os leds como saída
+ pinMode(ledVermelho, OUTPUT); //Define os LEDs como saída
  pinMode(ledAmarelo, OUTPUT);
  pinMode(ledVerde, OUTPUT);
  pinMode(buzzer, OUTPUT);
