@@ -9,16 +9,16 @@
 #define UTC_OFFSET -3    // Ajuste de fuso horário para UTC-3
 
 // Configurações do DHT11
-#define DHTPIN 5 //pin o DHT é o 5
+#define DHTPIN 6
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
-// Define o tipo de dislay           !!!Checar o modelo do i2c!!!!!
+// Define o tipo de dislay
 LiquidCrystal_I2C lcd(0x27, 16, 2); 
 RTC_DS1307 RTC; //Relógio
 
 // Configurações da EEPROM
-const int maxRecords = 100;
+const int maxRecords = 20;
 const int recordSize = 8; // Tamanho de cada registro em bytes
 int startAddress = 0;
 int endAddress = maxRecords * recordSize;
@@ -28,17 +28,17 @@ const unsigned long logInterval = 10000; // Intervalo de gravação (10 segundos
 unsigned long previousMillis = 0; // Tempo da última gravação
 
 // Triggers de temperatura e umidade
-float trigger_t_min = 20.0; // Exemplo: valor mínimo de temperatura
-float trigger_t_max = 30.0; // Exemplo: valor máximo de temperatura
-float trigger_u_min = 30.0; // Exemplo: valor mínimo de umidade
-float trigger_u_max = 60.0; // Exemplo: valor máximo de umidade
+float trigger_t_min = 20.0; // Valor mínimo de temperatura
+float trigger_u_min = 30.0; // Valor mínimo de umidade
+float trigger_t_max = 30.0; // Valor máximo de temperatura
+float trigger_u_max = 60.0; // Valor máximo de umidade
 
 // Associando pinos físicos as suas funções correspondentes
 #define pinoLDR A0
-#define ledVermelho 1
-#define ledAmarelo 2
-#define ledVerde 3
-#define buzzer 4
+#define ledVermelho 2
+#define ledAmarelo 3
+#define ledVerde 4
+#define buzzer 5
 
 // Declarando a variável global do nível de luminosidade 
 int intensidadeLDR; 
@@ -47,14 +47,22 @@ int intensidadeLDR;
 void setup() {
 
  //Confiurações para medir luminosidade
- Serial.begin(9600);
+ Serial.begin(9600); // Inicializa a TX Serial
+
  lcd.init();         // Inicializa o LCD
  lcd.backlight();   // Ativa o Backlight do display
+
+ pinMode(pinoLDR, INPUT); //Define o sensor LDR como entrada
  pinMode(ledVermelho, OUTPUT); //Define os leds como saída
  pinMode(ledAmarelo, OUTPUT);
  pinMode(ledVerde, OUTPUT);
- pinMode(pinoLDR, INPUT); //Define o sensor LDR como entrada
  pinMode(buzzer, OUTPUT);
+
+  //limpa a EEPROM ao ligar o Arduino
+ for (int i = 0 ; i < EEPROM.length() ; i++) {
+      EEPROM.write(i, 0);
+   }
+
  splashScreen();   // Chama a função da animação "MOSKITTO"      
 
 
@@ -65,21 +73,15 @@ void setup() {
  RTC.adjust(DateTime(F(__DATE__), F(__TIME__)));
  EEPROM.begin();
 
-
 }
 
-int luxTick(){ // Função luminosidade e I/O dos LEDs, LDR e buzzer
+// Função luminosidade e I/O dos LEDs, LDR e buzzer
+int luxTick(){
   lcd.clear();
   intensidadeLDR = map(analogRead(pinoLDR), 20, 1010, 0, 100); // função map() usada para criar uma range calibrada para o LDR de 0 a 100
 
   // Condições da checagem da luminosidade e subsequentes ações
   if (intensidadeLDR > 51) {
-    //Serial.println(" Luminosidade: Alerta!");
-    //lcd.clear();
-    //lcd.setCursor(0, 0);
-    //lcd.print("Nivel de Luz:");
-    //lcd.setCursor(1, 1);
-    //lcd.print(intensidadeLDR);
     digitalWrite(ledVermelho, HIGH);
     digitalWrite(ledAmarelo, LOW);
     digitalWrite(ledVerde, LOW);
@@ -91,12 +93,6 @@ int luxTick(){ // Função luminosidade e I/O dos LEDs, LDR e buzzer
     }
   }
   if (21 < intensidadeLDR and intensidadeLDR < 50) {
-    //Serial.println(" Luminosidade: Atencao!");
-    //lcd.clear();
-    //lcd.setCursor(0, 0);
-    //lcd.print("Nivel de Luz:");
-    //lcd.setCursor(1, 1);
-    //lcd.print(intensidadeLDR);
     digitalWrite(ledVermelho, LOW);
     digitalWrite(ledAmarelo, HIGH);
     digitalWrite(ledVerde, LOW);
@@ -110,12 +106,6 @@ int luxTick(){ // Função luminosidade e I/O dos LEDs, LDR e buzzer
 
   }
   if (intensidadeLDR < 20) {
-    //Serial.println(" Luminosidade: normal");
-    //lcd.clear();
-    //lcd.setCursor(0, 0);
-    //lcd.print("Nivel de Luz:");
-    //lcd.setCursor(1, 1);
-    //lcd.print(intensidadeLDR);
     digitalWrite(ledVermelho, LOW);
     digitalWrite(ledAmarelo, LOW);
     digitalWrite(ledVerde, HIGH);
@@ -130,7 +120,7 @@ int umidTemp() { //Função Umidade e Temperatura para o Display
   float temperature = dht.readTemperature();
 
   
-  //converte o valor da temp. e umid. para caber no display
+  //Converte o valor da temperatura e umidade para caber no display
   int humiInt = (int)humidity;
   char tempStr[6];
   dtostrf(temperature, 4, 1, tempStr);
@@ -173,7 +163,7 @@ int umidTemp() { //Função Umidade e Temperatura para o Display
   
 }
 
-int nivelCritico() { //Demonstra o status das medições(ruim ou okay)
+int nivelCritico() { //Demonstra o status das medições (ruim ou okay)
 
   float humidity = dht.readHumidity();
   float temperature = dht.readTemperature();
@@ -202,16 +192,50 @@ int nivelCritico() { //Demonstra o status das medições(ruim ou okay)
 
 }
 
+void relogioLCD() {
 
-void loop(){ // Função de loop principal do sistema para rodar indefinidamente
+  DateTime now = RTC.now();
+  DateTime timeIs = DateTime(now);
+
+  // Formatação da exibição do relógio no LCD 16x2
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Data: ");
+  lcd.print(timeIs.day() < 10 ? "0" : "");
+  lcd.print(timeIs.day());
+  lcd.print("/");
+  lcd.print(timeIs.month() < 10 ? "0" : "");
+  lcd.print(timeIs.month());
+  lcd.print("/");
+  lcd.print(timeIs.year());
+
+  lcd.setCursor(0, 1);
+  lcd.print("Hora: ");
+  lcd.print(timeIs.hour() < 10 ? "0" : "");
+  lcd.print(timeIs.hour());
+  lcd.print(":");
+  lcd.print(timeIs.minute() < 10 ? "0" : "");
+  lcd.print(timeIs.minute());
+  lcd.print(":");
+  lcd.print(timeIs.second() < 10 ? "0" : "");
+  lcd.print(timeIs.second());
+}
+
+// Função de loop principal do sistema para rodar indefinidamente
+void loop(){
   
+  // Função de indicação do nível da umidade e temperatura
   nivelCritico();
   delay(5000);
 
-  //Função da luminosidade, Temp. e Umid.
+  //Função da luminosidade, temperatura e umidade
   luxTick();
-  umidTemp(); 
-  delay(5000);  //delay entre as diferentes telas 
+  umidTemp();
+  delay(5000);
+
+  // Função da exibição do relógio na tela LCD 16x2
+  relogioLCD();
+  delay(5000); //delay entre as diferentes telas
 
 
  //Configurações para armazenar os dados
@@ -264,13 +288,13 @@ void loop(){ // Função de loop principal do sistema para rodar indefinidamente
         Serial.print("/");
         Serial.print(adjustedTime.year());
         Serial.print(" ");
-        Serial.print(adjustedTime.hour() < 10 ? "0" : ""); // Adiciona zero à esquerda se hora for menor que 10
+        Serial.print(adjustedTime.hour() < 10 ? "0" : "");
         Serial.print(adjustedTime.hour());
         Serial.print(":");
-        Serial.print(adjustedTime.minute() < 10 ? "0" : ""); // Adiciona zero à esquerda se minuto for menor que 10
+        Serial.print(adjustedTime.minute() < 10 ? "0" : "");
         Serial.print(adjustedTime.minute());
         Serial.print(":");
-        Serial.print(adjustedTime.second() < 10 ? "0" : ""); // Adiciona zero à esquerda se segundo for menor que 10
+        Serial.print(adjustedTime.second() < 10 ? "0" : "");
         Serial.print(adjustedTime.second());
         Serial.print("\n");
     }
