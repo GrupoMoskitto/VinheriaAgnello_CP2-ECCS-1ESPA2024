@@ -36,7 +36,7 @@ Essa é a segunda parte do projeto de Data Logger do primeiro semestre de Edge C
 - **Pinos usados pelo RTC:** SDA (A4), SCL (A5) (Analógicos)
 
 ## Funcionamento:
-Além da função principal da versão 1.0 do projeto, _luxTick( )_, agora o projeto conta com funções para verificar e apresentar no display as informações do sensor de umidade e temperatura, _umidTemp( )_ e _nivelCritico( )_, e função para apresentar um relógio baseado no módulo RTC no display, _relogioLCD( )_ e a função que apresenta a animação do logo no nosso grupo, _splashScreen( )_. A os dados são gravados na memória EEPROM a cada 10 segundos junto com o timestamp.
+Além da função principal da versão 1.0 do projeto, _luxTick( )_, agora o projeto conta com funções para verificar e apresentar no display as informações do sensor de umidade e temperatura, _umidTemp( )_ e _nivelCritico( )_, e função para apresentar um relógio baseado no módulo RTC no display, _relogioLCD( )_ e a função que apresenta a animação do logo no nosso grupo, _splashScreen( )_. Os dados são gravados na memória EEPROM a cada 10 segundos junto com o timestamp.
 
 **Limites:**
 - Função _luxTick( )_:
