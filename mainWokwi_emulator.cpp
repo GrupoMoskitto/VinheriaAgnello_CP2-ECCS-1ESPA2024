@@ -58,11 +58,6 @@ void setup() {
  pinMode(ledVerde, OUTPUT);
  pinMode(buzzer, OUTPUT);
 
-  //limpa a EEPROM ao ligar o Arduino
- for (int i = 0 ; i < EEPROM.length() ; i++) {
-      EEPROM.write(i, 0);
-   }
-
  splashScreen();   // Chama a função da animação "MOSKITTO"      
 
 
@@ -310,7 +305,7 @@ void getNextAddress() {
 }
 
 void get_log() {
-    Serial.println("Data stored in EEPROM:");
+    Serial.println("Dados Salvos na EEPROM:");
     Serial.println("Timestamp\t\tTemp. Crítica \tUmid. Crítica");
 
     for (int address = startAddress; address < endAddress; address += recordSize) {
