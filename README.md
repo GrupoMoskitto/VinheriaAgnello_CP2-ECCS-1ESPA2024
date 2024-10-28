@@ -2,17 +2,17 @@
 
 ## Mestre: 
 - Professor Fábio Cabrini
-## Membros do Grupo - **Moskitto**:
+## 👤Membros do Grupo - **Moskitto**:
 - [**Ana Luiza**](https://github.com/anarand) - RM561194
 - [**Francisco Vargas**](https://github.com/Franciscov25) - RM560322
 - [**Gabriel Kato**](https://github.com/kato8088) - RM560000
 - [**Gabriel Couto**](https://github.com/rouri404) - RM559579
 - [**João Vitor**](https://github.com/joaomatosq) - RM559246
 
-## Descrição do Projeto:
+## 💡Descrição do Projeto:
 Essa é a segunda parte do projeto de Data Logger do primeiro semestre de Edge Computing. O sistema até o momento consiste em um fotoresistor, três LEDs, um Buzzer, uma tela LCD 16x2 com um conversor serial I2C, um sensor de temperatura e umidade DHT11 e um microcontrolador Atmel ATMega 328P sob uma placa Arduino Uno R3.
 
-## Componentes Utilizados:
+## 📚Componentes Utilizados:
 - **Arduino Uno R3** ou **Arduino Nano**
 - **Tela LCD 16x2**
 - **Conversor Serial I2C**
@@ -25,7 +25,7 @@ Essa é a segunda parte do projeto de Data Logger do primeiro semestre de Edge C
 - **Jumpers**
 - **Protoboard**
 
-## Pinagem:
+## 📍Pinagem:
 - **LED Vermelho:** Digital 2 (D2)
 - **LED Amarelo:** Digital 3 (D3)
 - **LED Verde:** Digital 4 (D4)
