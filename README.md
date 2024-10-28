@@ -1,4 +1,4 @@
-# Caso da Vinheria Agnello - Data Logger - Checkpoint 1 - 1ESPA - Primeiro Semestre de 2024
+# Caso da Vinheria Agnello - Data Logger - Checkpoint 2️⃣ - 1ESPA - Primeiro Semestre de 2024
 
 ## Mestre: 
 - Professor Fábio Cabrini
@@ -35,7 +35,7 @@ Essa é a segunda parte do projeto de Data Logger do primeiro semestre de Edge C
 - **Pinos usados pelo LCD (I2C):** SDA, SCL (Digital)
 - **Pinos usados pelo RTC:** SDA (A4), SCL (A5) (Analógicos)
 
-## Funcionamento:
+## 👨🏽‍💻Funcionamento:
 Além da função principal da versão 1.0 do projeto, _luxTick( )_, agora o projeto conta com funções para verificar e apresentar no display as informações do sensor de umidade e temperatura, _umidTemp( )_ e _nivelCritico( )_, e função para apresentar um relógio baseado no módulo RTC no display, _relogioLCD( )_ e a função que apresenta a animação do logo no nosso grupo, _splashScreen( )_. Os dados são gravados na memória EEPROM a cada 10 segundos junto com o timestamp.
 
 **Limites:**
@@ -53,11 +53,11 @@ Quando a temperatura atinge um valor menor do que 20 °C ou maior do que 30 °C,
 
 Quando a umidade atinge um valor menor do que 30% ou maior do que 60%, a condição de umidade é considerada _Ruim_, caso contrário, a condição de umidade é considerada _OK!_
 
-## Montagem
+## ⚙️Montagem
 Faça a montagem seguindo o esquema eletrônico disponibilizado na imagem abaixo:
 ![Alt text](./ProjetoVinheriaAgnello_release_v2.png "Montagem Eletrônica")
 
-## Como instalar e rodar o projeto?
+## ❓Como instalar e rodar o projeto?
 1. Conecte os fios e componentes conforme o esquema elétrico providenciado com a placa desconectada.
 2. Conecte a placa ao PC.
 3. Usando uma IDE compatível com a linguagem C++ e as bibliotecas do Arduino (como o Arduino IDE), cole o código-fonte do projeto no IDE, compile e faça o *upload* para a placa.
