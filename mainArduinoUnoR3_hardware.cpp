@@ -31,7 +31,7 @@ unsigned long previousMillis = 0; // Tempo da última gravação
 float trigger_t_min = 20.0; // Valor mínimo de temperatura
 float trigger_u_min = 30.0; // Valor mínimo de umidade
 float trigger_t_max = 30.0; // Valor máximo de temperatura
-float trigger_u_max = 60.0; // Valor máximo de umidade
+float trigger_u_max = 70.0; // Valor máximo de umidade
 
 // Associando pinos físicos as suas funções correspondentes
 #define pinoLDR A0
